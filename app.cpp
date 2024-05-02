@@ -330,7 +330,8 @@ void afficherMenu()
     cout << "\033[32m1. Gerer les passagers\033[0m" << endl;
     cout << "\033[33m2. Gerer les vols\033[0m" << endl;
     cout << "\033[34m3. Gerer les reservations\033[0m" << endl;
-    cout << "\033[90;1m4. Quitter\033[0m" << endl;
+    cout << "\033[35m4. Gerer les paiements\033[0m" << endl;
+    cout << "\033[90;1m5. Quitter\033[0m" << endl;
 }
 
 // Fonction pour modifier un passager
@@ -1019,6 +1020,56 @@ void afficherMenuReservations(map<int,Reservation> &reservations, deque<Vol> &vo
     } while (choix != 6);
 }
 
+//todo: Fonction pour afficher le menu de gestion des paiements
+void afficherMenuPaiements(set<Paiement> &paiements)
+{
+    int choix;
+
+    do
+    {
+        system("cls"); // Effacer l'écran
+
+        cout << "\033[91;1m+++++++ Menu de gestion des paiements : +++++++\033[0m" << endl;
+        cout << "\033[36m1. Ajouter un paiement\033[0m" << endl;
+        cout << "\033[35m2. Modifier un paiement\033[0m" << endl;
+        cout << "\033[33m3. Supprimer un paiement\033[0m" << endl;
+        cout << "\033[96m4. Afficher les paiements\033[0m" << endl;
+        cout << "\033[90;1m5. Retour au menu principal\033[0m" << endl;
+
+        cout << "Entrez votre choix : ";
+        cin >> choix;
+
+        switch (choix)
+        {
+        case 1:
+            // Logique pour ajouter un paiement
+            system("cls");  // Effacer l'écran
+            // Ajouter un paiement
+            break;
+        case 2:
+            // Logique pour modifier un paiement
+            system("cls");  // Effacer l'écran
+            // Modifier un paiement
+            break;
+        case 3:
+            // Logique pour supprimer un paiement
+            system("cls");  // Effacer l'écran
+            // Supprimer un paiement
+            break;
+        case 4:
+            // Logique pour afficher les paiements
+            system("cls");  // Effacer l'écran
+            // Afficher les paiements
+            break;
+        case 5:
+            system("cls");  // Effacer l'écran
+            afficherMenu(); // Retour au menu principal
+            break;          // Retour au menu principal
+        default:
+            cout << "Choix invalide. Veuillez reessayer." << endl;
+        }
+    } while (choix != 5);
+}
 
 //! Fonction Main
 int main()
@@ -1051,6 +1102,10 @@ int main()
                 afficherMenuReservations(reservations, vols, passagers);
                 break;
             case 4:
+                // Logique pour gérer les paiements
+                afficherMenuPaiements(paiements);
+                break;
+            case 5:
                 system("cls");  // Effacer l'écran
                 // Quitter le programme
                 cout << "Au revoir !" << endl;
@@ -1058,7 +1113,7 @@ int main()
             default:
                 cout << "Choix invalide. Veuillez reessayer." << endl;
         }
-    } while (choix != 4);
+    } while (choix != 5);
 
     return 0;
 }
