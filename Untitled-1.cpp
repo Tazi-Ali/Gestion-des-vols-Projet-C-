@@ -232,37 +232,6 @@ public:
 //* Initialisation du compteur d'ID Passager
 int Passager::nextId = 1;
 
-// Définition de la classe Reservation
-class Reservation
-{
-private:
-    int idReservation;
-    Date dateReservation;
-    Passager *passager;
-
-
-public:
-    // Constructeur par défaut
-    Reservation() : idReservation(0), dateReservation({0, 0, 0}), passager(nullptr) {}
-    // Constructeur paramétré
-    Reservation(int id, Date date, Passager *passager) : idReservation(id), dateReservation(date), passager(passager) {}
-    // Getters
-    int getIdReservation() { return idReservation; }
-    Date getDateReservation() { return dateReservation; }
-    Passager *getPassager() { return passager; }
-    // Setters
-    void setIdReservation(int id) { idReservation = id; }
-    void setDateReservation(Date date) { dateReservation = date; }
-    void setPassager(Passager *passager) { this->passager = passager; }
-    // Methode pour afficher les informations de la reservation
-    void afficher()
-    {
-        cout << "ID Reservation: " << idReservation << endl;
-        cout << "Date Reservation: " << dateReservation.day << "/" << dateReservation.month << "/" << dateReservation.year << endl;
-        cout << "Passager: " << passager->getNom() << endl;
-    }
-};
-
 // Définition de la classe Paiement
 class Paiement
 {
@@ -277,6 +246,39 @@ public:
     // Constructor, getters, setters, and other methods
 };
 
+// Définition de la classe Reservation
+class Reservation
+{
+private:
+    int idReservation;
+    Date dateReservation;
+    Passager *passager;
+    Paiement *paiement;  
+
+
+public:
+    // Constructeur par défaut
+    Reservation() : idReservation(0), dateReservation({0, 0, 0}), passager(nullptr), paiement(nullptr) {}
+    // Constructeur paramétré
+    Reservation(int id, Date date, Passager *passager, Paiement *paiement) : idReservation(id), dateReservation(date), passager(passager), paiement(paiement) {}
+    // Getters
+    int getIdReservation() { return idReservation; }
+    Date getDateReservation() { return dateReservation; }
+    Passager *getPassager() { return passager; }
+    Paiement *getPaiement() { return paiement; }
+    // Setters
+    void setIdReservation(int id) { idReservation = id; }
+    void setDateReservation(Date date) { dateReservation = date; }
+    void setPassager(Passager *passager) { this->passager = passager; }
+    void setPaiement(Paiement *paiement) { this->paiement = paiement; }
+    // Methode pour afficher les informations de la reservation
+    void afficher()
+    {
+        cout << "ID Reservation: " << idReservation << endl;
+        cout << "Date Reservation: " << dateReservation.day << "/" << dateReservation.month << "/" << dateReservation.year << endl;
+        cout << "Passager: " << passager->getNom() << endl;
+    }
+};
 
 
 
@@ -556,7 +558,7 @@ void afficherMenuPassagers(list<Passager> &passagers, map<int, Reservation> &res
             // Logique pour afficher la facture de paiement des passagers
             system("cls");  // Effacer l'écran
             // Afficher la facture de paiement des passagers
-            
+
             break;
         case 9:
             system("cls");  // Effacer l'écran
