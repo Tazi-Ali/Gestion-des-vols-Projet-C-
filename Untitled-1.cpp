@@ -556,6 +556,7 @@ void afficherMenuPassagers(list<Passager> &passagers, map<int, Reservation> &res
             // Logique pour afficher la facture de paiement des passagers
             system("cls");  // Effacer l'écran
             // Afficher la facture de paiement des passagers
+            
             break;
         case 9:
             system("cls");  // Effacer l'écran
