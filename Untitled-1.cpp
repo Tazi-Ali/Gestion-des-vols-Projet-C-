@@ -22,6 +22,12 @@ struct Date
     int year;
 };
 
+// Les classes sont déclarées avant d'être utilisées dans les fonctions
+// Ceci est nécessaire car les classes sont utilisées dans les fonctions pour eviter les erreurs de compilation
+// Les fonctions sont définies après la définition des classes
+class Paiement;
+class Reservation;
+
 // Définition de la classe Vol
 // Cette classe utilise des attributs protégés pour que les classes dérivées puissent y accéder directement
 class Vol
@@ -178,6 +184,7 @@ public:
     }
 };
 
+
 // Définition de la classe Passager
 class Passager
 {
@@ -215,10 +222,7 @@ public:
 
     void setPasseport(string passeport) { this->passeport = passeport; }
 
-    void facturePaiement()
-    {
-        // Implement the method here
-    }
+    void facturePaiement(map<int, Reservation> reservations, deque<Vol> vols);
 
     void afficher()
     {
@@ -231,20 +235,6 @@ public:
 
 //* Initialisation du compteur d'ID Passager
 int Passager::nextId = 1;
-
-// Définition de la classe Paiement
-class Paiement
-{
-private:
-    int idPaiement;
-    double montant;
-    Date datePaiement;
-    string methodePaiement;
-    
-
-public:
-    // Constructor, getters, setters, and other methods
-};
 
 // Définition de la classe Reservation
 class Reservation
@@ -277,6 +267,54 @@ public:
         cout << "ID Reservation: " << idReservation << endl;
         cout << "Date Reservation: " << dateReservation.day << "/" << dateReservation.month << "/" << dateReservation.year << endl;
         cout << "Passager: " << passager->getNom() << endl;
+    }
+};
+
+// Définition de la classe Paiement
+class Paiement
+{
+private:
+    int idPaiement;
+    double montant;
+    Date datePaiement;
+    string methodePaiement;
+    
+public:
+    // Constructeur par défaut
+    Paiement() : idPaiement(0), montant(0.0), datePaiement({0, 0, 0}), methodePaiement("") {}
+
+    // Constructeur paramétré
+    Paiement(int idPaiement, double montant, Date datePaiement, string methodePaiement) {
+        this->idPaiement = idPaiement;
+        this->montant = montant;
+        this->datePaiement = datePaiement;
+        this->methodePaiement = methodePaiement;
+    }
+
+    //getters and setters for Paiement class
+    int getIdPaiement() { return idPaiement; }
+    double getMontant() { return montant; }
+    void setMontant(double montant) { this->montant = montant;  }
+    Date getDatePaiement() { return datePaiement; }
+    void setDatePaiement(Date datePaiement) { this->datePaiement = datePaiement; }
+    string getMethodePaiement() { return methodePaiement; }
+    void setMethodePaiement(string methodePaiement) { this->methodePaiement = methodePaiement; }
+
+    // Methode pour afficher les informations du paiement
+    void afficher()
+    {
+        cout << "ID Paiement: " << idPaiement << endl;
+        cout << "Montant: " << montant << endl;
+        cout << "Date Paiement: " << datePaiement.day << "/" << datePaiement.month << "/" << datePaiement.year << endl;
+        cout << "Methode Paiement: " << methodePaiement << endl;
+    }
+
+    // Methode pour appliquer une réduction de 15% si le paiement est en espèces
+    void appliquerReduction15() {
+        if (methodePaiement == "Cash")
+        {
+            montant *= 0.85; // Réduction de 15%
+        }
     }
 };
 
@@ -441,6 +479,57 @@ void appliquerReduction(Passager& passager, map<int, Reservation> &reservations,
     }
 }
 
+// Surcharge de method facturePaiement
+void Passager::facturePaiement(map<int, Reservation> reservations, deque<Vol> vols)
+{
+    cout << "\033[92;1m+++++++++++ Facture de paiement pour : +++++++++++\033[0m" << endl;
+    cout << "\033[93;1m- Identifiant passager: \033[0;1m" << idPassager << "\033[0m" << "\033[93;1m - Numero passeport: \033[0;1m" << passeport << "\033[0m" << endl;
+    cout << "\033[93;1m-Nom passager: \033[0;1m" << nom << "\033[0m" << endl;
+    cout << endl;
+    cout << "\033[92;1m-Reservations:" << endl;
+    cout << endl;
+    cout << "\033[93;1mIdentifiant reservation\t\tDate\t\tNumero de vol\t\tPrix\033[0m" << endl;
+
+    double totalPaiement = 0.0;
+
+    for (auto &pair : reservations)
+    {
+        if (pair.second.getPassager()->getIdPassager() == idPassager)
+        {
+            int numeroVol = pair.second.getIdReservation();
+            auto volIt = find_if(vols.begin(), vols.end(), [numeroVol](Vol &vol)
+                                    { return vol.getNumeroVol() == numeroVol; });
+
+            if (volIt != vols.end())
+            {
+                cout << pair.second.getIdReservation() << "\t \t";
+                cout << "\t \t" << pair.second.getDateReservation().day << "/" << pair.second.getDateReservation().month << "/" << pair.second.getDateReservation().year << "\t";
+                cout << "\t" << volIt->getNumeroVol() << "\t";
+                cout << "\t" << volIt->getPrix() << endl;
+
+                totalPaiement += volIt->getPrix();
+            }
+        }
+    }
+
+    cout << "\n\033[94;1mTotal à payer: \033[0;1m" << totalPaiement <<  "\033[0m" << endl;
+}
+
+//fonction pour Appliquer une réduction de 15% aux paiements effectue par cash
+void appliquerReduction15Cash(map<int, Reservation> &reservations)
+{
+    for (auto it = reservations.begin(); it != reservations.end(); ++it)
+    {
+        Reservation &reservation = it->second;
+        Paiement *paiement = reservation.getPaiement();
+
+        if (paiement && paiement->getMethodePaiement() == "Cash")
+        {
+            paiement->appliquerReduction15();
+        
+        }
+    }
+}
 
 //todo: Fonction pour afficher le menu de gestion des passagers
 void afficherMenuPassagers(list<Passager> &passagers, map<int, Reservation> &reservations, deque<Vol> &vols)
@@ -523,6 +612,9 @@ void afficherMenuPassagers(list<Passager> &passagers, map<int, Reservation> &res
             {
                 montantDepense(passager, reservations, vols);
             }
+            // Attendre l'entrée de l'utilisateur
+            cout << "Appuyez sur une touche pour continuer...";
+            system("pause > nul");
             break;
         case 6:
             // Logique pour trier la liste des vols par nom passager
@@ -553,12 +645,22 @@ void afficherMenuPassagers(list<Passager> &passagers, map<int, Reservation> &res
             }
             // Message de confirmation
             cout << "Reduction de 20% effectuee." << endl;
+            // Attendre l'entrée de l'utilisateur
+            cout << "Appuyez sur une touche pour continuer...";
+            system("pause > nul");
             break;
         case 8:
             // Logique pour afficher la facture de paiement des passagers
             system("cls");  // Effacer l'écran
             // Afficher la facture de paiement des passagers
-
+            for (Passager &passager : passagers)
+            {
+                // Afficher la facture de paiement
+                passager.facturePaiement(reservations, vols);
+            }
+            // Attendre l'entrée de l'utilisateur
+            cout << "Appuyez sur une touche pour continuer...";
+            system("pause > nul");
             break;
         case 9:
             system("cls");  // Effacer l'écran
@@ -595,10 +697,10 @@ void afficherMenuVols(deque<Vol> &vols)
         {
         case 1:
         {
+            system("cls");  // Effacer l'écran
             Vol vol;
             vol.ajouter();
             vols.push_back(vol);
-            system("cls");  // Effacer l'écran
             // Message de confirmation
             cout << "\033[92;1mVol ajoute avec succes.\033[0m" << endl;
             // Attendre l'entrée de l'utilisateur
@@ -699,6 +801,7 @@ void afficherMenuVols(deque<Vol> &vols)
             }
             else
             {
+                cout << "\033[31;1m+++++++ Liste des vols: +++++++\033[0m" << endl;
                 for (Vol &vol : vols)
                 {
                     vol.afficher();
@@ -733,7 +836,8 @@ void afficherMenuReservations(map<int,Reservation> &reservations, deque<Vol> &vo
         cout << "\033[35m2. Modifier une reservation\033[0m" << endl;
         cout << "\033[33m3. Supprimer une reservation\033[0m" << endl;
         cout << "\033[96m4. Afficher les reservations\033[0m" << endl;
-        cout << "\033[90;1m5. Retour au menu principal\033[0m" << endl;
+        cout << "\033[92m5. Appliquer la reduction de 15% pour les paiements en cash\033[0m" << endl;
+        cout << "\033[90;1m6. Retour au menu principal\033[0m" << endl;
 
         cout << "Entrez votre choix : ";
         cin >> choix;
@@ -784,7 +888,7 @@ void afficherMenuReservations(map<int,Reservation> &reservations, deque<Vol> &vo
             }
             else
             {
-                cout << "\033[92mVol ou passager non trouve.\033[0m" << endl;
+                cout << "\033[91mVol ou passager non trouve.\033[0m" << endl;
             }
             // Attendre l'entrée de l'utilisateur
             cout << "Appuyez sur une touche pour continuer...";
@@ -896,6 +1000,15 @@ void afficherMenuReservations(map<int,Reservation> &reservations, deque<Vol> &vo
         }
         else if (choix == 5)
         {
+            // Logique pour appliquer la réduction de 15% pour les paiements en cash
+            system("cls");  // Effacer l'écran
+            appliquerReduction15Cash(reservations);
+            // Attendre l'entrée de l'utilisateur
+            cout << "Appuyez sur une touche pour continuer...";
+            system("pause > nul");
+        }
+        else if (choix == 6)
+        {
             system("cls");  // Effacer l'écran
             afficherMenu(); // Retour au menu principal
         }
@@ -903,7 +1016,7 @@ void afficherMenuReservations(map<int,Reservation> &reservations, deque<Vol> &vo
         {
             cout << "Choix invalide. Veuillez reessayer." << endl;
         }
-    } while (choix != 5);
+    } while (choix != 6);
 }
 
 
