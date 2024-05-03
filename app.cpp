@@ -255,14 +255,14 @@ public:
     int getIdReservation() { return idReservation; }
     Date getDateReservation() { return dateReservation; }
     Passager *getPassager() { return passager; }
-    Paiement *getPaiement() { return paiement; }
+    Paiement *getPaiement() const { return paiement; }
     // Setters
     void setIdReservation(int id) { idReservation = id; }
     void setDateReservation(Date date) { dateReservation = date; }
     void setPassager(Passager *passager) { this->passager = passager; }
     void setPaiement(Paiement *paiement) { this->paiement = paiement; }
     // Methode pour afficher les informations de la reservation
-    void afficher()
+    void afficher() const
     {
         cout << "ID Reservation: " << idReservation << endl;
         cout << "Date Reservation: " << dateReservation.day << "/" << dateReservation.month << "/" << dateReservation.year << endl;
@@ -292,7 +292,7 @@ public:
     }
 
     //getters and setters for Paiement class
-    int getIdPaiement() { return idPaiement; }
+    int getIdPaiement() const { return idPaiement; }
     double getMontant() { return montant; }
     void setMontant(double montant) { this->montant = montant;  }
     Date getDatePaiement() { return datePaiement; }
@@ -301,7 +301,7 @@ public:
     void setMethodePaiement(string methodePaiement) { this->methodePaiement = methodePaiement; }
 
     // Methode pour afficher les informations du paiement
-    void afficher()
+    void afficher() const
     {
         cout << "ID Paiement: " << idPaiement << endl;
         cout << "Montant: " << montant << endl;
@@ -531,6 +531,55 @@ void appliquerReduction15Cash(map<int, Reservation> &reservations)
         }
     }
 }
+
+// Fonction pour ajouter un paiement à un ensemble (std::set)
+void ajouterPaiement(set<Paiement> &paiements)
+{
+    int idPaiement;
+    double montant;
+    int day, month, year;
+    string methodePaiement;
+
+    cout << "Entrez l'identifiant du paiement : ";
+    cin >> idPaiement;
+
+    cout << "Entrez le montant du paiement : ";
+    cin >> montant;
+
+    cout << "Entrez la date du paiement (jj mm aaaa) : ";
+    cin >> day >> month >> year;
+
+    cout << "Entrez la méthode de paiement : ";
+    cin.ignore(); // Pour vider le buffer
+    getline(cin, methodePaiement);
+
+    // Création d'un objet Date pour le paiement
+    Date datePaiement = {day, month, year};
+
+    // Création d'un nouvel objet Paiement
+    Paiement nouveauPaiement(idPaiement, montant, datePaiement, methodePaiement);
+
+    // Ajout du paiement à l'ensemble
+    paiements.insert(nouveauPaiement);
+
+    cout << "Paiement ajouté avec succès." << endl;
+}
+
+// Fonction pour afficher Reservations superieures dont le montant a 4500dh
+void afficherReservationsSuperieures(const std::set<Reservation>& reservations) {
+    system("cls"); // Effacer l'écran
+    std::cout << "\033[93;1m++++++++ Liste des reservations dont le montant est superieur à 4500 dh: ++++++++\033[0m \n" << std::endl;
+    for (const auto &reservation : reservations) {
+        if (reservation.getPaiement() != nullptr && reservation.getPaiement()->getMontant() > 4500) {
+            reservation.afficher(); // Afficher la réservation
+            std::cout << std::endl;
+        }
+    }
+    // Attendre l'entrée de l'utilisateur
+    std::cout << "Appuyez sur une touche pour continuer...";
+    system("pause > nul");
+}
+
 
 //todo: Fonction pour afficher le menu de gestion des passagers
 void afficherMenuPassagers(list<Passager> &passagers, map<int, Reservation> &reservations, deque<Vol> &vols)
@@ -1021,12 +1070,10 @@ void afficherMenuReservations(map<int,Reservation> &reservations, deque<Vol> &vo
 }
 
 //todo: Fonction pour afficher le menu de gestion des paiements
-void afficherMenuPaiements(set<Paiement> &paiements)
-{
+void afficherMenuPaiements(set<Paiement> &paiements) {
     int choix;
 
-    do
-    {
+    do {
         system("cls"); // Effacer l'écran
 
         cout << "\033[91;1m+++++++ Menu de gestion des paiements : +++++++\033[0m" << endl;
@@ -1039,36 +1086,69 @@ void afficherMenuPaiements(set<Paiement> &paiements)
         cout << "Entrez votre choix : ";
         cin >> choix;
 
-        switch (choix)
-        {
-        case 1:
-            // Logique pour ajouter un paiement
-            system("cls");  // Effacer l'écran
-            // Ajouter un paiement
-            break;
-        case 2:
-            // Logique pour modifier un paiement
-            system("cls");  // Effacer l'écran
-            // Modifier un paiement
-            break;
-        case 3:
-            // Logique pour supprimer un paiement
-            system("cls");  // Effacer l'écran
-            // Supprimer un paiement
-            break;
-        case 4:
-            // Logique pour afficher les paiements
-            system("cls");  // Effacer l'écran
-            // Afficher les paiements
-            break;
-        case 5:
-            system("cls");  // Effacer l'écran
-            afficherMenu(); // Retour au menu principal
-            break;          // Retour au menu principal
-        default:
-            cout << "Choix invalide. Veuillez reessayer." << endl;
+        switch (choix) {
+            case 1:
+                system("cls"); // Effacer l'écran
+                ajouterPaiement(paiements); // Utiliser la fonction ajouterPaiement
+                break;
+            case 2:
+                // Logique pour modifier un paiement
+                break;
+            case 3: {
+                system("cls"); // Effacer l'écran
+                int idPaiement;
+                cout << "Entrez l'identifiant du paiement à supprimer : ";
+                cin >> idPaiement;
+
+                // Recherche du paiement dans le set
+                auto it = paiements.begin();
+                while (it != paiements.end()) {
+                    if (it->getIdPaiement() == idPaiement) {
+                        paiements.erase(it); // Supprimer le paiement
+                        cout << "\033[92;1mPaiement supprime avec succes.\033[0m" << endl;
+                        break; // Sortir de la boucle une fois le paiement trouvé et supprimé
+                    } else {
+                        ++it;
+                    }
+                }
+
+                if (it == paiements.end()) {
+                    cout << "\033[91mPaiement non trouve.\033[0m" << endl;
+                }
+
+                // Attendre l'entrée de l'utilisateur
+                cout << "Appuyez sur une touche pour continuer...";
+                system("pause > nul");
+                break;
+            }
+            case 4: {
+                system("cls"); // Effacer l'écran
+                if (paiements.empty()) {
+                    cout << "\033[91mAucun paiement trouve.\033[0m \n" << endl;
+                } else {
+                    cout << "\033[93;1m++++++++ Liste des paiements: ++++++++\033[0m \n" << endl;
+                    for (const auto &paiement : paiements) {
+                        paiement.afficher();
+                        cout << endl;
+                    }
+                }
+                // Attendre l'entrée de l'utilisateur
+                cout << "Appuyez sur une touche pour continuer...";
+                system("pause > nul");
+                break;
+            }
+            case 5:
+                system("cls"); // Effacer l'écran
+                
+                break;
+            case 6:
+                system("cls"); // Effacer l'écran
+                afficherMenu(); // Retour au menu principal
+                break;
+            default:
+                cout << "Choix invalide. Veuillez reessayer." << endl;
         }
-    } while (choix != 5);
+    } while (choix != 6);
 }
 
 //! Fonction Main
